@@ -11,7 +11,7 @@
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Test.cpp">
+    <ClCompile Include="PTX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

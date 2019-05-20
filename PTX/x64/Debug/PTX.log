@@ -18,4 +18,17 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\device_doub
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\sm_20_intrinsics.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\sm_20_intrinsics.h(925): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
   DrawColor.cu
+  PTX.cpp
+E:\files\C++\include\_String.h(84): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdio.h(2263): note: see declaration of 'sscanf'
+E:\files\C++\include\_File.h(146): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(90): note: see declaration of 'strcat'
+E:\files\C++\include\_File.h(294): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdio.h(208): note: see declaration of 'fopen'
+E:\files\C++\include\_File.h(302): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdio.h(208): note: see declaration of 'fopen'
+E:\files\C++\include\_File.h(312): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdio.h(208): note: see declaration of 'fopen'
+E:\files\C++\include\_File.h(325): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\stdio.h(208): note: see declaration of 'fopen'
   PTX.vcxproj -> E:\files\C++\OptiX\PTX\x64\Debug\PTX.exe
