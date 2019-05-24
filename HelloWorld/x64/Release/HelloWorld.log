@@ -1,0 +1,58 @@
+﻿  Compiling CUDA source file DrawColor.cu...
+  
+  E:\files\C++\OptiX\PTX\HelloWorld>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\bin\nvcc.exe" -gencode=arch=compute_75,code=\"sm_75,compute_75\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.20.27508\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 -ptx -cudart static  -o ptx\DrawColor.ptx "E:\files\C++\OptiX\PTX\HelloWorld\DrawColor.cu" 
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h(824): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h(1759): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h(2621): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h(3460): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h(4403): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h(5301): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h(6212): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h(7093): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\math_functions.h(7892): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt/device_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt/device_functions.h(773): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt/device_functions.h(1628): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\crt\device_double_functions.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\sm_20_intrinsics.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\sm_20_intrinsics.h(925): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  DrawColor.cu
+  HelloWorld.cpp
+E:\files\C++\include\_Math.h(1109): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+E:\files\C++\include\GL\_OpenGL.h(271): warning C4312: 'type cast': conversion from 'int' to 'const void *' of greater size
+E:\files\C++\include\GL\_OpenGL.h(694): warning C4244: 'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
+E:\files\C++\include\GL\_OpenGL.h(704): warning C4244: 'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
+E:\files\C++\include\_BMP.h(98): warning C4018: '<': signed/unsigned mismatch
+E:\files\C++\include\_BMP.h(104): warning C4018: '<': signed/unsigned mismatch
+E:\files\C++\include\_BMP.h(121): warning C4018: '<': signed/unsigned mismatch
+E:\files\C++\include\_BMP.h(127): warning C4018: '<': signed/unsigned mismatch
+E:\files\C++\include\_Math.h(616): warning C4244: '/=': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=int
+          ]
+  E:\files\C++\include\_Math.h(609): note: while compiling class template member function 'Math::vec<int,3> &Math::vec<int,3>::normaliaze(void)'
+  E:\files\C++\include\_Math.h(1239): note: see reference to function template instantiation 'Math::vec<int,3> &Math::vec<int,3>::normaliaze(void)' being compiled
+  E:\files\C++\include\_Math.h(1183): note: see reference to class template instantiation 'Math::vec<int,3>' being compiled
+E:\files\C++\include\_Array.h(59): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+  E:\files\C++\include\_Array.h(58): note: while compiling class template member function 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>::Array(const std::initializer_list<T> &)'
+          with
+          [
+              T=OpenGL::OptiX::DefautRenderer::TriangleData::Vertex
+          ]
+  E:\files\C++\include\GL\_OptiX.h(24): note: see reference to function template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>::Array(const std::initializer_list<T> &)' being compiled
+          with
+          [
+              T=OpenGL::OptiX::DefautRenderer::TriangleData::Vertex
+          ]
+  E:\files\C++\include\_Array.h(13): note: see reference to class template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>' being compiled
+  E:\files\C++\include\GL\_OptiX.h(20): note: see reference to class template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Triangle,2>' being compiled
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Generating code
+  1 of 331 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+glew32s.lib(glew.obj) : warning LNK4099: PDB 'glew_static.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'E:\files\C++\OptiX\PTX\x64\Release\glew_static.pdb'; linking object as if no debug info
+  HelloWorld.vcxproj -> E:\files\C++\OptiX\PTX\x64\Release\HelloWorld.exe

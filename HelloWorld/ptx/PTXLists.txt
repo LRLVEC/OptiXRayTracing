@@ -1,0 +1,4 @@
+Program:	DrawColor
+{
+	draw_solid_color
+}

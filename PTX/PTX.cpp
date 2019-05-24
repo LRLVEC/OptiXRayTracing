@@ -22,6 +22,8 @@ int main(int argc, char* argv[])
 	rtContextSetRayTypeCount(context, 1);
 	rtContextSetEntryPointCount(context, 1);
 
+	
+
 	rtBufferCreate(context, RT_BUFFER_OUTPUT, &buffer);
 	rtBufferSetFormat(buffer, RT_FORMAT_FLOAT4);
 	rtBufferSetSize2D(buffer, width, height);
