@@ -6,11 +6,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="DrawColor.cu">
-      <Filter>Source Files</Filter>
-    </CudaCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="HelloWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -19,5 +14,10 @@
     <ClInclude Include="..\..\..\include\GL\_OptiX.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="DrawColor.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

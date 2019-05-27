@@ -11,13 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="DrawColor.cu" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="HelloWorld.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\GL\_OptiX.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="DrawColor.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{44B162A0-3F4F-4A23-92C2-3CB4FAF21BA7}</ProjectGuid>

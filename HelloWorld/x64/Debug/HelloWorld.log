@@ -1,31 +1,34 @@
 ﻿  HelloWorld.cpp
-E:\files\C++\include\_Math.h(1109): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-E:\files\C++\include\GL\_OpenGL.h(271): warning C4312: 'type cast': conversion from 'int' to 'const void *' of greater size
-E:\files\C++\include\GL\_OpenGL.h(694): warning C4244: 'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
-E:\files\C++\include\GL\_OpenGL.h(704): warning C4244: 'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
-E:\files\C++\include\_BMP.h(98): warning C4018: '<': signed/unsigned mismatch
-E:\files\C++\include\_BMP.h(104): warning C4018: '<': signed/unsigned mismatch
-E:\files\C++\include\_BMP.h(121): warning C4018: '<': signed/unsigned mismatch
-E:\files\C++\include\_BMP.h(127): warning C4018: '<': signed/unsigned mismatch
-E:\files\C++\include\_Math.h(616): warning C4244: '/=': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=int
-          ]
-  E:\files\C++\include\_Math.h(609): note: while compiling class template member function 'Math::vec<int,3> &Math::vec<int,3>::normaliaze(void)'
-  E:\files\C++\include\_Math.h(1239): note: see reference to function template instantiation 'Math::vec<int,3> &Math::vec<int,3>::normaliaze(void)' being compiled
-  E:\files\C++\include\_Math.h(1183): note: see reference to class template instantiation 'Math::vec<int,3>' being compiled
-E:\files\C++\include\_Array.h(59): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-  E:\files\C++\include\_Array.h(58): note: while compiling class template member function 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>::Array(const std::initializer_list<T> &)'
-          with
-          [
-              T=OpenGL::OptiX::DefautRenderer::TriangleData::Vertex
-          ]
-  E:\files\C++\include\GL\_OptiX.h(23): note: see reference to function template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>::Array(const std::initializer_list<T> &)' being compiled
-          with
-          [
-              T=OpenGL::OptiX::DefautRenderer::TriangleData::Vertex
-          ]
-  E:\files\C++\include\_Array.h(13): note: see reference to class template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>' being compiled
-  E:\files\C++\include\GL\_OptiX.h(19): note: see reference to class template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Triangle,2>' being compiled
+E:\files\C++\include\_Math.h(1109,1): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
+E:\files\C++\include\GL\_OpenGL.h(271,1): warning C4312:  'type cast': conversion from 'int' to 'const void *' of greater size
+E:\files\C++\include\GL\_OpenGL.h(694,6): warning C4244:  'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
+E:\files\C++\include\GL\_OpenGL.h(704,6): warning C4244:  'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
+E:\files\C++\include\_BMP.h(98,22): warning C4018:  '<': signed/unsigned mismatch
+E:\files\C++\include\_BMP.h(104,22): warning C4018:  '<': signed/unsigned mismatch
+E:\files\C++\include\_BMP.h(121,22): warning C4018:  '<': signed/unsigned mismatch
+E:\files\C++\include\_BMP.h(127,22): warning C4018:  '<': signed/unsigned mismatch
+E:\files\C++\OptiX\PTX\HelloWorld\HelloWorld.cpp(61,1): warning C4305:  '+=': truncation from 'double' to 'float'
+E:\files\C++\include\_Math.h(616,1): warning C4244:  '/=': conversion from 'double' to 'T', possible loss of data
+E:\files\C++\include\_Math.h(616,1): warning C4244:         with
+E:\files\C++\include\_Math.h(616,1): warning C4244:         [
+E:\files\C++\include\_Math.h(616,1): warning C4244:             T=int
+E:\files\C++\include\_Math.h(616,1): warning C4244:         ]
+E:\files\C++\include\_Math.h(609): message :  while compiling class template member function 'Math::vec<int,3> &Math::vec<int,3>::normaliaze(void)'
+E:\files\C++\include\_Math.h(1239): message :  see reference to function template instantiation 'Math::vec<int,3> &Math::vec<int,3>::normaliaze(void)' being compiled
+E:\files\C++\include\_Math.h(1183): message :  see reference to class template instantiation 'Math::vec<int,3>' being compiled
+E:\files\C++\include\_Array.h(59,1): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+E:\files\C++\include\_Array.h(58): message :  while compiling class template member function 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>::Array(const std::initializer_list<T> &)'
+E:\files\C++\include\_Array.h(58): message :         with
+E:\files\C++\include\_Array.h(58): message :         [
+E:\files\C++\include\_Array.h(58): message :             T=OpenGL::OptiX::DefautRenderer::TriangleData::Vertex
+E:\files\C++\include\_Array.h(58): message :         ]
+E:\files\C++\include\GL\_OptiX.h(24): message :  see reference to function template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>::Array(const std::initializer_list<T> &)' being compiled
+E:\files\C++\include\GL\_OptiX.h(24): message :         with
+E:\files\C++\include\GL\_OptiX.h(24): message :         [
+E:\files\C++\include\GL\_OptiX.h(24): message :             T=OpenGL::OptiX::DefautRenderer::TriangleData::Vertex
+E:\files\C++\include\GL\_OptiX.h(24): message :         ]
+E:\files\C++\include\_Array.h(13): message :  see reference to class template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>' being compiled
+E:\files\C++\include\GL\_OptiX.h(20): message :  see reference to class template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Triangle,2>' being compiled
+E:\files\C++\include\GL\_OptiX.h(20): message : E:\files\C++\include\GL\_OptiX.h(174) : warning C4715: 'OpenGL::OptiX::PTXManager::getFunction': not all control paths return a value
+E:\files\C++\include\GL\_OptiX.h(20): message : E:\files\C++\include\GL\_OptiX.h(128) : warning C4715: 'OpenGL::OptiX::PTXManager::Source::operator==': not all control paths return a value
   HelloWorld.vcxproj -> E:\files\C++\OptiX\PTX\x64\Debug\HelloWorld.exe

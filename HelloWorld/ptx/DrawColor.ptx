@@ -10,7 +10,7 @@
 .target sm_75
 .address_size 64
 
-	// .globl	_Z16draw_solid_colorv
+	// .globl	_Z9drawColorv
 .global .align 8 .b8 launch_index[8];
 .global .align 1 .b8 result_buffer[1];
 .global .align 4 .b8 draw_color[12];
@@ -49,7 +49,7 @@
 .global .align 1 .b8 _ZN23rti_internal_annotation12launch_indexE[1];
 .global .align 1 .b8 _ZN23rti_internal_annotation10draw_colorE[1];
 
-.visible .entry _Z16draw_solid_colorv(
+.visible .entry _Z9drawColorv(
 
 )
 {

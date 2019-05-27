@@ -17,52 +17,57 @@ namespace OpenGL
 	struct HelloWorld :OpenGL
 	{
 		SourceManager sm;
+		OptiX::PTXManager pm;
 		OptiX::DefautRenderer renderer;
-		RTcontext context;
-		RTprogram ray_gen_program;
+		OptiX::Context context;
+		OptiX::Program drawColor;
 		RTbuffer  buffer;
 		RTvariable result_buffer;
 		RTvariable draw_color;
-
+		float t;
 		HelloWorld(FrameScale const& _size)
 			:
 			sm(),
+			pm(&sm.folder),
 			renderer(&sm, _size),
-			context(0)
-		{
-		}
-		virtual void init(FrameScale const& _size) override
+			context({ &drawColor }, 1),
+			drawColor(&context.context, pm, "drawColor"),
+			t(0)
 		{
 			renderer.prepare();
-			rtContextCreate(&context);
-			rtContextSetRayTypeCount(context, 1);
-			rtContextSetEntryPointCount(context, 1);
+			context.init();
 			rtBufferCreateFromGLBO(context, RT_BUFFER_OUTPUT, renderer, &buffer);
 			//rtBufferCreate(context, RT_BUFFER_OUTPUT, &buffer);
 			rtBufferSetFormat(buffer, RT_FORMAT_FLOAT4);
 			rtBufferSetSize2D(buffer, _size.w, _size.h);
 			rtContextDeclareVariable(context, "result_buffer", &result_buffer);
 			rtVariableSetObject(result_buffer, buffer);
-			File ahh("./ptx/");
-			String<char>bhh(ahh.find("DrawColor.ptx").readText());
-			rtProgramCreateFromPTXString(context, bhh, "draw_solid_color", &ray_gen_program);
-			rtProgramDeclareVariable(ray_gen_program, "draw_color", &draw_color);
-			rtVariableSet3f(draw_color, 0, 1, 0);
-			rtContextSetRayGenerationProgram(context, 0, ray_gen_program);
+
+			rtProgramDeclareVariable(drawColor, "draw_color", &draw_color);
+			rtVariableSet3f(draw_color, 0, 1, 1);
+
+
+			rtContextSetRayGenerationProgram(context, 0, drawColor);
 			rtContextValidate(context);
-			rtContextLaunch2D(context, 0 /* entry point */, _size.w, _size.h);
+		}
+		virtual void init(FrameScale const& _size) override
+		{
 			renderer.updated = true;
 			glViewport(0, 0, _size.w, _size.h);
 		}
 		virtual void run() override
 		{
+			if (t > 1)t = 0;
+			rtVariableSet3f(draw_color, 0, t += 0.01, 1);
+			rtContextLaunch2D(context, 0 /* entry point */, 400, 400);
+			renderer.updated = true;
 			renderer.use();
 			renderer.run();
 		}
 		void terminate()
 		{
 			rtBufferDestroy(buffer);
-			rtProgramDestroy(ray_gen_program);
+			rtProgramDestroy(drawColor);
 			rtContextDestroy(context);
 		}
 		virtual void frameSize(int _w, int _h)override
