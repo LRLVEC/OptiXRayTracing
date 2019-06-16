@@ -1,0 +1,7 @@
+Program:	DrawColor
+{
+	drawColor
+	closeHit
+	anyHit
+	miss
+}

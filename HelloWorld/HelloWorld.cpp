@@ -12,67 +12,84 @@ namespace OpenGL
 {
 	namespace OptiX
 	{
-
+		struct HelloWorld :RayTracer
+		{
+			DefautRenderer renderer;
+			PTXManager pm;
+			Context context;
+			Program drawColor;
+			Buffer buffer;
+			Variable<RTcontext> result;
+			Variable<RTprogram> color;
+			float t;
+			HelloWorld(::OpenGL::SourceManager* _sm, FrameScale const& _size)
+				:
+				renderer(_sm, _size),
+				pm(&_sm->folder),
+				context({ &drawColor }, 1),
+				drawColor(context, pm, "drawColor"),
+				buffer(context, RT_BUFFER_OUTPUT, RT_FORMAT_FLOAT4, renderer),
+				result(context, "result"),
+				color(drawColor, "color"),
+				t(0)
+			{
+				renderer.prepare();
+				context.init();
+				buffer.setSize(_size.w, _size.h);
+				result.setObject(buffer);
+				color.set3f(0, 1, 1);
+				context.validate();
+			}
+			virtual void run()override
+			{
+				if (t > 2 * Math::Pi)t -= 2 * Math::Pi;
+				color.set3f((1 - sinf(t += 0.01)) / 2, (1 + sinf(t += 0.01)) / 2, 1);
+				FrameScale size(renderer.size());
+				context.launch(0, size.w, size.h);
+				renderer.updated = true;
+				renderer.use();
+				renderer.run();
+			}
+			virtual void resize(FrameScale const& _size)override
+			{
+				buffer.unreg();
+				renderer.resize(_size);
+				buffer.reg();
+				buffer.setSize(_size.w, _size.w);
+			}
+			virtual void terminate()override
+			{
+				buffer.destory();
+				drawColor.destory();
+				context.destory();
+			}
+		};
 	}
 	struct HelloWorld :OpenGL
 	{
 		SourceManager sm;
-		OptiX::PTXManager pm;
-		OptiX::DefautRenderer renderer;
-		OptiX::Context context;
-		OptiX::Program drawColor;
-		RTbuffer  buffer;
-		RTvariable result_buffer;
-		RTvariable draw_color;
-		float t;
+		OptiX::HelloWorld hw;
 		HelloWorld(FrameScale const& _size)
 			:
 			sm(),
-			pm(&sm.folder),
-			renderer(&sm, _size),
-			context({ &drawColor }, 1),
-			drawColor(&context.context, pm, "drawColor"),
-			t(0)
+			hw(&sm, _size)
 		{
-			renderer.prepare();
-			context.init();
-			rtBufferCreateFromGLBO(context, RT_BUFFER_OUTPUT, renderer, &buffer);
-			//rtBufferCreate(context, RT_BUFFER_OUTPUT, &buffer);
-			rtBufferSetFormat(buffer, RT_FORMAT_FLOAT4);
-			rtBufferSetSize2D(buffer, _size.w, _size.h);
-			rtContextDeclareVariable(context, "result_buffer", &result_buffer);
-			rtVariableSetObject(result_buffer, buffer);
-
-			rtProgramDeclareVariable(drawColor, "draw_color", &draw_color);
-			rtVariableSet3f(draw_color, 0, 1, 1);
-
-
-			rtContextSetRayGenerationProgram(context, 0, drawColor);
-			rtContextValidate(context);
 		}
 		virtual void init(FrameScale const& _size) override
 		{
-			renderer.updated = true;
-			glViewport(0, 0, _size.w, _size.h);
+			hw.resize(_size);
 		}
 		virtual void run() override
 		{
-			if (t > 1)t = 0;
-			rtVariableSet3f(draw_color, 0, t += 0.01, 1);
-			rtContextLaunch2D(context, 0 /* entry point */, 400, 400);
-			renderer.updated = true;
-			renderer.use();
-			renderer.run();
+			hw.run();
 		}
 		void terminate()
 		{
-			rtBufferDestroy(buffer);
-			rtProgramDestroy(drawColor);
-			rtContextDestroy(context);
+			hw.terminate();
 		}
 		virtual void frameSize(int _w, int _h)override
 		{
-			renderer.resize(_w, _h);
+			hw.resize({ _w,_h });
 		}
 		virtual void framePos(int, int) override {}
 		virtual void frameFocus(int) override {}
@@ -122,13 +139,13 @@ int main()
 		"PBOTest",
 		{
 			{400,400},
-			false,false
+			true,false
 		}
 	};
 	Window::WindowManager wm(winParameters);
 	OpenGL::HelloWorld test({ 400,400 });
 	wm.init(0, &test);
-	glfwSwapInterval(1);
+	glfwSwapInterval(0);
 	FPS fps;
 	fps.refresh();
 	while (!wm.close())

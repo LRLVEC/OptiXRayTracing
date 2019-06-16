@@ -1,13 +1,14 @@
 ﻿  HelloWorld.cpp
 E:\files\C++\include\_Math.h(1109,1): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
-E:\files\C++\include\GL\_OpenGL.h(271,1): warning C4312:  'type cast': conversion from 'int' to 'const void *' of greater size
-E:\files\C++\include\GL\_OpenGL.h(694,6): warning C4244:  'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
-E:\files\C++\include\GL\_OpenGL.h(704,6): warning C4244:  'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
+E:\files\C++\include\GL\_OpenGL.h(275,1): warning C4312:  'type cast': conversion from 'int' to 'const void *' of greater size
+E:\files\C++\include\GL\_OpenGL.h(698,6): warning C4244:  'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
+E:\files\C++\include\GL\_OpenGL.h(708,6): warning C4244:  'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
 E:\files\C++\include\_BMP.h(98,22): warning C4018:  '<': signed/unsigned mismatch
 E:\files\C++\include\_BMP.h(104,22): warning C4018:  '<': signed/unsigned mismatch
 E:\files\C++\include\_BMP.h(121,22): warning C4018:  '<': signed/unsigned mismatch
 E:\files\C++\include\_BMP.h(127,22): warning C4018:  '<': signed/unsigned mismatch
-E:\files\C++\OptiX\PTX\HelloWorld\HelloWorld.cpp(61,1): warning C4305:  '+=': truncation from 'double' to 'float'
+E:\files\C++\OptiX\PTX\HelloWorld\HelloWorld.cpp(45,1): warning C4305:  '-=': truncation from 'double' to 'float'
+E:\files\C++\OptiX\PTX\HelloWorld\HelloWorld.cpp(46,1): warning C4305:  '+=': truncation from 'double' to 'float'
 E:\files\C++\include\_Math.h(616,1): warning C4244:  '/=': conversion from 'double' to 'T', possible loss of data
 E:\files\C++\include\_Math.h(616,1): warning C4244:         with
 E:\files\C++\include\_Math.h(616,1): warning C4244:         [
@@ -29,6 +30,6 @@ E:\files\C++\include\GL\_OptiX.h(24): message :             T=OpenGL::OptiX::Def
 E:\files\C++\include\GL\_OptiX.h(24): message :         ]
 E:\files\C++\include\_Array.h(13): message :  see reference to class template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Vertex,3>' being compiled
 E:\files\C++\include\GL\_OptiX.h(20): message :  see reference to class template instantiation 'Array<OpenGL::OptiX::DefautRenderer::TriangleData::Triangle,2>' being compiled
-E:\files\C++\include\GL\_OptiX.h(20): message : E:\files\C++\include\GL\_OptiX.h(174) : warning C4715: 'OpenGL::OptiX::PTXManager::getFunction': not all control paths return a value
-E:\files\C++\include\GL\_OptiX.h(20): message : E:\files\C++\include\GL\_OptiX.h(128) : warning C4715: 'OpenGL::OptiX::PTXManager::Source::operator==': not all control paths return a value
+E:\files\C++\include\GL\_OptiX.h(20): message : E:\files\C++\include\GL\_OptiX.h(178) : warning C4715: 'OpenGL::OptiX::PTXManager::getFunction': not all control paths return a value
+E:\files\C++\include\GL\_OptiX.h(20): message : E:\files\C++\include\GL\_OptiX.h(132) : warning C4715: 'OpenGL::OptiX::PTXManager::Source::operator==': not all control paths return a value
   HelloWorld.vcxproj -> E:\files\C++\OptiX\PTX\x64\Debug\HelloWorld.exe

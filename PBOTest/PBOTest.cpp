@@ -99,6 +99,7 @@ namespace OpenGL
 			renderer.use();
 			tex.bindUnit();
 
+			
 			rtContextCreate(&context);
 			rtContextSetRayTypeCount(context, 1);
 			rtContextSetEntryPointCount(context, 1);
@@ -210,6 +211,7 @@ int main()
 	};
 	Window::WindowManager wm(winParameters);
 	OpenGL::PBOTest test;
+	init.printRenderer();
 	wm.init(0, &test);
 	glfwSwapInterval(1);
 	FPS fps;

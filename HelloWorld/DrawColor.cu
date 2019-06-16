@@ -5,11 +5,14 @@
 using namespace optix;
 
 rtDeclareVariable(uint2, launch_index, rtLaunchIndex, );
-rtBuffer<float4, 2>   result_buffer;
+rtBuffer<float4, 2>   result;
 
-rtDeclareVariable(float3,                draw_color, , );
+rtDeclareVariable(float3, color, , );
 
 RT_PROGRAM void drawColor()
 {
-  result_buffer[launch_index] = make_float4(draw_color, 0.f);
+	result[launch_index] = make_float4(
+		color.x + (float)launch_index.x / result.size().x,
+		color.y + (float)launch_index.y / result.size().y,
+		color.z + (float)launch_index.x / result.size().x, 0.f);
 }
