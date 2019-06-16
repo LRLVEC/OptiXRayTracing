@@ -3,7 +3,7 @@
 #include <GL/_OpenGL.h>
 #include <GL/_Window.h>
 #include <GL/_Texture.h>
-#include <GL/_OptiX.h>
+#include <OptiX/_OptiX.h>
 #include <_Math.h>
 #include <_Time.h>
 #include <_Array.h>

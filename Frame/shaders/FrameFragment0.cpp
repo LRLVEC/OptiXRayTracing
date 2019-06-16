@@ -4,5 +4,6 @@ in vec2 texCood;
 out vec4 o_color;
 void main()
 {
-	o_color = texture(texSmp, texCood);
+	vec4 ahh = texture(texSmp, texCood);
+	o_color = ahh / ahh.w;
 }

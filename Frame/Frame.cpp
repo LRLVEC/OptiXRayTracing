@@ -3,11 +3,11 @@
 #include <GL/_OpenGL.h>
 #include <GL/_Window.h>
 #include <GL/_Texture.h>
-#include <GL/_OptiX.h>
+#include <OptiX/_OptiX.h>
+#include <OptiX/_Define.h>
 #include <_Math.h>
 #include <_Time.h>
 #include <_Array.h>
-#include "Define.h"
 
 namespace OpenGL
 {
@@ -35,60 +35,20 @@ namespace OpenGL
 					anyHit.setProgram();
 				}
 			};
-			struct FrameData :VariableBase::Data
-			{
-				unsigned int frame;
-				virtual void* pointer()override
-				{
-					return &frame;
-				}
-				virtual unsigned long long size()override
-				{
-					return sizeof(frame);
-				}
-			};
-			struct ColorData :VariableBase::Data
-			{
-				Define::Color color;
-				virtual void* pointer()override
-				{
-					return &color;
-				}
-				virtual unsigned long long size()override
-				{
-					return sizeof(color);
-				}
-			};
-			struct TransformData :VariableBase::Data
-			{
-				Define::Eye eye;
-				virtual void* pointer()override
-				{
-					return&eye;
-				}
-				virtual unsigned long long size()override
-				{
-					return sizeof(eye);
-				}
-			};
-
 			DefautRenderer renderer;
 			PTXManager pm;
 			Context context;
+			Transform trans;
 			Program rayAllocator;
 			Program miss;
 			Buffer resultBuffer;
 			Buffer vertexBuffer;
-			SimpleMaterial cc;
-			FrameData frameData;
-			ColorData colorData;
-			TransformData transformData;
+			SimpleMaterial material;
 			GeometryTriangles triangles;
 			Variable<RTcontext> result;
-			Variable<FrameData> frame;
-			Variable<ColorData> backgroundColor;
+			Variable<RTcontext> frame;
+			Variable<RTcontext> backgroundColor;
 			Variable<RTcontext> offset;
-			Variable<TransformData>transform;
 			Variable<RTcontext> groupGPU;
 			Variable<RTgeometrytriangles> triangleVertices;
 			GeometryInstance instance;
@@ -96,40 +56,42 @@ namespace OpenGL
 			Acceleration geoGroupAccel;
 			Acceleration groupAccel;
 			Group group;
+			unsigned int frameNum;
 			Frame(::OpenGL::SourceManager* _sm, FrameScale const& _size)
 				:
 				renderer(_sm, _size),
 				pm(&_sm->folder),
 				context({ &rayAllocator }, 2),
+				trans({ context, {60.0},{0.002,0.9,0.001},{0.01},{0,0,0},700.0 }),
 				rayAllocator(context, pm, "rayAllocator"),
 				miss(context, pm, "miss"),
-				resultBuffer(context, RT_BUFFER_OUTPUT, RT_FORMAT_FLOAT4, renderer),
+				resultBuffer(context, RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, renderer),
 				vertexBuffer(context, RT_BUFFER_INPUT, RT_FORMAT_FLOAT3),
-				cc(context, pm),
+				material(context, pm),
 				triangles(context, 2, 1, RT_GEOMETRY_BUILD_FLAG_NONE),
 				result(context, "result"),
-				frame(context, "frame", &frameData),
-				backgroundColor(context, "background", &colorData),
+				frame(context, "frame"),
+				backgroundColor(context, "background"),
 				offset(context, "offset"),
-				transform(context, "eye", &transformData),
 				groupGPU(context, "group"),
 				triangleVertices(triangles, "vertices"),
 				instance(context),
 				geoGroup(context),
 				group(context),
 				geoGroupAccel(context, Acceleration::Trbvh),
-				groupAccel(context, Acceleration::Trbvh)
+				groupAccel(context, Acceleration::Trbvh),
+				frameNum(0)
 			{
 				renderer.prepare();
 				//context.printAllDeviceInfo();
 				context.init();
+				trans.init(_size);
 				rtContextSetMissProgram(context, CloseRay, miss);
 				resultBuffer.setSize(_size.w, _size.h);
-
 				vertexBuffer.setSize(6);
 				Math::vec3<float>* v = (Math::vec3<float>*)vertexBuffer.map();
 				v[0] = { 0,0,-1 };
-				v[1] = { 1,0,-1 };
+				v[1] = { 0.1,1,-1 };
 				v[2] = { 0,1,-1 };
 				v[3] = { 0,0,-0.5 };
 				v[4] = { -1,0,-0.5 };
@@ -138,7 +100,7 @@ namespace OpenGL
 
 				triangles.setVertices(&vertexBuffer, 6, 0, 12);
 				instance.setTriangles(triangles);
-				instance.setMaterial({ &cc });
+				instance.setMaterial({ &material });
 				geoGroup.setInstance({ &instance });
 				geoGroup.setAccel(geoGroupAccel);
 				group.setAccel(groupAccel);
@@ -146,22 +108,21 @@ namespace OpenGL
 				result.setObject(resultBuffer);
 				groupGPU.setObject(group);
 				triangleVertices.setObject(vertexBuffer);
-				frameData.frame = 0;
-				frame.set();
-				transformData.eye =
-				{
-					{0,0,0},
-					-200
-				};
-				transform.set();
-				colorData.color = { 0,1,1 };
-				backgroundColor.set();
-				cc.color.set3f(1.0f, 0.0f, 0.0f);
-				offset.set1f(1e-5);
+				backgroundColor.set3f(0.0f, 0.0f, 0.0f);
+				material.color.set3f(0.0f, 1.0f, 0.0f);
+				offset.set1f(1e-5f);
 				context.validate();
 			}
 			virtual void run()override
 			{
+				trans.operate();
+				if (trans.updated)
+				{
+					frameNum = 0;
+					trans.updated = false;
+				}
+				else ++frameNum;
+				frame.set1u(frameNum);
 				FrameScale size(renderer.size());
 				context.launch(0, size.w, size.h);
 				renderer.updated = true;
@@ -170,6 +131,7 @@ namespace OpenGL
 			}
 			virtual void resize(FrameScale const& _size)override
 			{
+				trans.resize(_size.w, _size.h);
 				resultBuffer.unreg();
 				renderer.resize(_size);
 				resultBuffer.setSize(_size.w, _size.h);
@@ -220,21 +182,21 @@ namespace OpenGL
 		virtual void frameFocus(int) override {}
 		virtual void mouseButton(int _button, int _action, int _mods)override
 		{
-			/*switch (_button)
+			switch (_button)
 			{
-				case GLFW_MOUSE_BUTTON_LEFT:renderer.trans.mouse.refreshButton(0, _action); break;
-				case GLFW_MOUSE_BUTTON_MIDDLE:renderer.trans.mouse.refreshButton(1, _action); break;
-				case GLFW_MOUSE_BUTTON_RIGHT:renderer.trans.mouse.refreshButton(2, _action); break;
-			}*/
+				case GLFW_MOUSE_BUTTON_LEFT:frame.trans.mouse.refreshButton(0, _action); break;
+				case GLFW_MOUSE_BUTTON_MIDDLE:frame.trans.mouse.refreshButton(1, _action); break;
+				case GLFW_MOUSE_BUTTON_RIGHT:frame.trans.mouse.refreshButton(2, _action); break;
+			}
 		}
 		virtual void mousePos(double _x, double _y)override
 		{
-			//renderer.trans.mouse.refreshPos(_x, _y);
+			frame.trans.mouse.refreshPos(_x, _y);
 		}
 		virtual void mouseScroll(double _x, double _y)override
 		{
-			//if (_y != 0.0)
-				//renderer.trans.scroll.refresh(_y);
+			if (_y != 0.0)
+				frame.trans.scroll.refresh(_y);
 		}
 		virtual void key(GLFWwindow* _window, int _key, int _scancode, int _action, int _mods) override
 		{
@@ -245,10 +207,10 @@ namespace OpenGL
 						if (_action == GLFW_PRESS)
 							glfwSetWindowShouldClose(_window, true);
 						break;
-						//case GLFW_KEY_A:renderer.trans.key.refresh(0, _action); break;
-						//case GLFW_KEY_D:renderer.trans.key.refresh(1, _action); break;
-						//case GLFW_KEY_W:renderer.trans.key.refresh(2, _action); break;
-						//case GLFW_KEY_S:renderer.trans.key.refresh(3, _action); break;
+					case GLFW_KEY_A:frame.trans.key.refresh(0, _action); break;
+					case GLFW_KEY_D:frame.trans.key.refresh(1, _action); break;
+					case GLFW_KEY_W:frame.trans.key.refresh(2, _action); break;
+					case GLFW_KEY_S:frame.trans.key.refresh(3, _action); break;
 				}
 			}
 		}
