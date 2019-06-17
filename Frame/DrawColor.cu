@@ -2,6 +2,7 @@
 #include <optix_device.h>
 #include <optixu/optixu_math_namespace.h>
 #include <OptiX/_Define.h>
+#include "Define.h"
 using namespace optix;
 
 rtDeclareVariable(uint2, index, rtLaunchIndex, );

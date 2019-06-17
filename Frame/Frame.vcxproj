@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\GL\_OptiX.h" />
     <ClInclude Include="..\..\..\include\_STL.h" />
+    <ClInclude Include="Define.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="DrawColor.cu" />

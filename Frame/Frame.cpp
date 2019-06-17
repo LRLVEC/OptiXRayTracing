@@ -9,6 +9,7 @@
 #include <_Time.h>
 #include <_Array.h>
 #include <_STL.h>
+#include "Define.h"
 
 namespace OpenGL
 {
