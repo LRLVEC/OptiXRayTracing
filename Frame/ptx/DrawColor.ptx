@@ -13,7 +13,7 @@
 	// .globl	_Z12rayAllocatorv
 .global .align 8 .b8 index[8];
 .global .align 1 .b8 result[1];
-.global .align 1 .b8 vertices[1];
+.global .align 1 .b8 vertexBuffer[1];
 .global .align 4 .u32 frame;
 .global .align 4 .b8 background[12];
 .global .align 4 .b8 materialColor[12];
@@ -21,6 +21,8 @@
 .global .align 4 .f32 offset;
 .global .align 4 .b8 group[4];
 .global .align 4 .b8 rayData[16];
+.global .align 4 .b8 normal[12];
+.global .align 4 .b8 texcoord[12];
 .global .align 4 .b8 _ZN21rti_internal_typeinfo5indexE[8] = {82, 97, 121, 0, 8, 0, 0, 0};
 .global .align 4 .b8 _ZN21rti_internal_typeinfo5frameE[8] = {82, 97, 121, 0, 4, 0, 0, 0};
 .global .align 4 .b8 _ZN21rti_internal_typeinfo10backgroundE[8] = {82, 97, 121, 0, 12, 0, 0, 0};
@@ -29,6 +31,8 @@
 .global .align 4 .b8 _ZN21rti_internal_typeinfo6offsetE[8] = {82, 97, 121, 0, 4, 0, 0, 0};
 .global .align 4 .b8 _ZN21rti_internal_typeinfo5groupE[8] = {82, 97, 121, 0, 4, 0, 0, 0};
 .global .align 4 .b8 _ZN21rti_internal_typeinfo7rayDataE[8] = {82, 97, 121, 0, 16, 0, 0, 0};
+.global .align 4 .b8 _ZN21rti_internal_typeinfo6normalE[8] = {82, 97, 121, 0, 12, 0, 0, 0};
+.global .align 4 .b8 _ZN21rti_internal_typeinfo8texcoordE[8] = {82, 97, 121, 0, 12, 0, 0, 0};
 .global .align 8 .u64 _ZN21rti_internal_register20reg_bitness_detectorE;
 .global .align 8 .u64 _ZN21rti_internal_register24reg_exception_64_detail0E;
 .global .align 8 .u64 _ZN21rti_internal_register24reg_exception_64_detail1E;
@@ -61,6 +65,8 @@
 .global .align 1 .b8 _ZN21rti_internal_typename6offsetE[6] = {102, 108, 111, 97, 116, 0};
 .global .align 1 .b8 _ZN21rti_internal_typename5groupE[9] = {114, 116, 79, 98, 106, 101, 99, 116, 0};
 .global .align 1 .b8 _ZN21rti_internal_typename7rayDataE[16] = {68, 101, 102, 105, 110, 101, 58, 58, 82, 97, 121, 68, 97, 116, 97, 0};
+.global .align 1 .b8 _ZN21rti_internal_typename6normalE[7] = {102, 108, 111, 97, 116, 51, 0};
+.global .align 1 .b8 _ZN21rti_internal_typename8texcoordE[7] = {102, 108, 111, 97, 116, 51, 0};
 .global .align 4 .u32 _ZN21rti_internal_typeenum5indexE = 4919;
 .global .align 4 .u32 _ZN21rti_internal_typeenum5frameE = 4919;
 .global .align 4 .u32 _ZN21rti_internal_typeenum10backgroundE = 4919;
@@ -69,6 +75,8 @@
 .global .align 4 .u32 _ZN21rti_internal_typeenum6offsetE = 4919;
 .global .align 4 .u32 _ZN21rti_internal_typeenum5groupE = 4919;
 .global .align 4 .u32 _ZN21rti_internal_typeenum7rayDataE = 4919;
+.global .align 4 .u32 _ZN21rti_internal_typeenum6normalE = 4919;
+.global .align 4 .u32 _ZN21rti_internal_typeenum8texcoordE = 4919;
 .global .align 1 .b8 _ZN21rti_internal_semantic5indexE[14] = {114, 116, 76, 97, 117, 110, 99, 104, 73, 110, 100, 101, 120, 0};
 .global .align 1 .b8 _ZN21rti_internal_semantic5frameE[1];
 .global .align 1 .b8 _ZN21rti_internal_semantic10backgroundE[1];
@@ -77,6 +85,8 @@
 .global .align 1 .b8 _ZN21rti_internal_semantic6offsetE[1];
 .global .align 1 .b8 _ZN21rti_internal_semantic5groupE[1];
 .global .align 1 .b8 _ZN21rti_internal_semantic7rayDataE[10] = {114, 116, 80, 97, 121, 108, 111, 97, 100, 0};
+.global .align 1 .b8 _ZN21rti_internal_semantic6normalE[17] = {97, 116, 116, 114, 105, 98, 117, 116, 101, 32, 110, 111, 114, 109, 97, 108, 0};
+.global .align 1 .b8 _ZN21rti_internal_semantic8texcoordE[19] = {97, 116, 116, 114, 105, 98, 117, 116, 101, 32, 116, 101, 120, 99, 111, 111, 114, 100, 0};
 .global .align 1 .b8 _ZN23rti_internal_annotation5indexE[1];
 .global .align 1 .b8 _ZN23rti_internal_annotation5frameE[1];
 .global .align 1 .b8 _ZN23rti_internal_annotation10backgroundE[1];
@@ -85,6 +95,8 @@
 .global .align 1 .b8 _ZN23rti_internal_annotation6offsetE[1];
 .global .align 1 .b8 _ZN23rti_internal_annotation5groupE[1];
 .global .align 1 .b8 _ZN23rti_internal_annotation7rayDataE[1];
+.global .align 1 .b8 _ZN23rti_internal_annotation6normalE[1];
+.global .align 1 .b8 _ZN23rti_internal_annotation8texcoordE[1];
 .const .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
 .visible .entry _Z12rayAllocatorv(
@@ -604,15 +616,32 @@ BB0_49:
 
 )
 {
-	.reg .f32 	%f<4>;
+	.reg .f32 	%f<21>;
 
 
-	ld.global.f32 	%f1, [materialColor];
-	ld.global.f32 	%f2, [materialColor+4];
-	ld.global.f32 	%f3, [materialColor+8];
-	st.global.f32 	[rayData], %f1;
-	st.global.f32 	[rayData+4], %f2;
-	st.global.f32 	[rayData+8], %f3;
+	ld.global.f32 	%f1, [normal];
+	add.f32 	%f2, %f1, 0f3F800000;
+	ld.global.f32 	%f3, [normal+4];
+	add.f32 	%f4, %f3, 0f3F800000;
+	ld.global.f32 	%f5, [normal+8];
+	add.f32 	%f6, %f5, 0f3F800000;
+	mul.f32 	%f7, %f4, %f4;
+	fma.rn.f32 	%f8, %f2, %f2, %f7;
+	fma.rn.f32 	%f9, %f6, %f6, %f8;
+	sqrt.rn.f32 	%f10, %f9;
+	rcp.rn.f32 	%f11, %f10;
+	mul.f32 	%f12, %f2, %f11;
+	mul.f32 	%f13, %f4, %f11;
+	mul.f32 	%f14, %f6, %f11;
+	ld.global.f32 	%f15, [materialColor];
+	mul.f32 	%f16, %f15, %f12;
+	ld.global.f32 	%f17, [materialColor+4];
+	mul.f32 	%f18, %f13, %f17;
+	ld.global.f32 	%f19, [materialColor+8];
+	mul.f32 	%f20, %f14, %f19;
+	st.global.f32 	[rayData], %f16;
+	st.global.f32 	[rayData+4], %f18;
+	st.global.f32 	[rayData+8], %f20;
 	ret;
 }
 
@@ -657,6 +686,84 @@ BB0_49:
 	mov.f32 	%f1, 0f00000000;
 	mov.f32 	%f2, 0f3F800000;
 	st.v4.f32 	[%rd1], {%f2, %f1, %f1, %f1};
+	ret;
+}
+
+	// .globl	_Z6attribv
+.visible .entry _Z6attribv(
+
+)
+{
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<12>;
+	.reg .b64 	%rd<20>;
+
+
+	// inline asm
+	call (%r1), _rt_get_primitive_index, ();
+	// inline asm
+	mul.lo.s32 	%r8, %r1, 3;
+	cvt.u64.u32	%rd3, %r8;
+	mov.u64 	%rd19, vertexBuffer;
+	cvta.global.u64 	%rd2, %rd19;
+	mov.u32 	%r6, 1;
+	mov.u32 	%r7, 12;
+	mov.u64 	%rd18, 0;
+	// inline asm
+	call (%rd1), _rt_buffer_get_64, (%rd2, %r6, %r7, %rd3, %rd18, %rd18, %rd18);
+	// inline asm
+	ld.f32 	%f3, [%rd1];
+	ld.f32 	%f4, [%rd1+4];
+	ld.f32 	%f5, [%rd1+8];
+	add.s32 	%r9, %r8, 1;
+	cvt.u64.u32	%rd9, %r9;
+	// inline asm
+	call (%rd7), _rt_buffer_get_64, (%rd2, %r6, %r7, %rd9, %rd18, %rd18, %rd18);
+	// inline asm
+	ld.f32 	%f6, [%rd7];
+	ld.f32 	%f7, [%rd7+4];
+	ld.f32 	%f8, [%rd7+8];
+	add.s32 	%r10, %r8, 2;
+	cvt.u64.u32	%rd15, %r10;
+	// inline asm
+	call (%rd13), _rt_buffer_get_64, (%rd2, %r6, %r7, %rd15, %rd18, %rd18, %rd18);
+	// inline asm
+	ld.f32 	%f9, [%rd13];
+	ld.f32 	%f10, [%rd13+4];
+	ld.f32 	%f11, [%rd13+8];
+	sub.f32 	%f12, %f6, %f3;
+	sub.f32 	%f13, %f7, %f4;
+	sub.f32 	%f14, %f8, %f5;
+	sub.f32 	%f15, %f9, %f3;
+	sub.f32 	%f16, %f10, %f4;
+	sub.f32 	%f17, %f11, %f5;
+	mul.f32 	%f18, %f13, %f17;
+	mul.f32 	%f19, %f14, %f16;
+	sub.f32 	%f20, %f18, %f19;
+	mul.f32 	%f21, %f14, %f15;
+	mul.f32 	%f22, %f12, %f17;
+	sub.f32 	%f23, %f21, %f22;
+	mul.f32 	%f24, %f12, %f16;
+	mul.f32 	%f25, %f13, %f15;
+	sub.f32 	%f26, %f24, %f25;
+	mul.f32 	%f27, %f23, %f23;
+	fma.rn.f32 	%f28, %f20, %f20, %f27;
+	fma.rn.f32 	%f29, %f26, %f26, %f28;
+	sqrt.rn.f32 	%f30, %f29;
+	rcp.rn.f32 	%f31, %f30;
+	mul.f32 	%f32, %f31, %f20;
+	mul.f32 	%f33, %f31, %f23;
+	mul.f32 	%f34, %f31, %f26;
+	st.global.f32 	[normal], %f32;
+	st.global.f32 	[normal+4], %f33;
+	st.global.f32 	[normal+8], %f34;
+	// inline asm
+	call (%f1, %f2), _rt_get_triangle_barycentrics, ();
+	// inline asm
+	st.global.f32 	[texcoord], %f1;
+	st.global.f32 	[texcoord+4], %f2;
+	mov.u32 	%r11, 0;
+	st.global.u32 	[texcoord+8], %r11;
 	ret;
 }
 

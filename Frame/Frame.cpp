@@ -8,6 +8,7 @@
 #include <_Math.h>
 #include <_Time.h>
 #include <_Array.h>
+#include <_STL.h>
 
 namespace OpenGL
 {
@@ -41,8 +42,8 @@ namespace OpenGL
 			Transform trans;
 			Program rayAllocator;
 			Program miss;
+			Program triangleAttrib;
 			Buffer resultBuffer;
-			Buffer vertexBuffer;
 			SimpleMaterial material;
 			GeometryTriangles triangles;
 			Variable<RTcontext> result;
@@ -50,36 +51,39 @@ namespace OpenGL
 			Variable<RTcontext> backgroundColor;
 			Variable<RTcontext> offset;
 			Variable<RTcontext> groupGPU;
-			Variable<RTgeometrytriangles> triangleVertices;
 			GeometryInstance instance;
 			GeometryGroup geoGroup;
 			Acceleration geoGroupAccel;
 			Acceleration groupAccel;
 			Group group;
+			STL ahh;
 			unsigned int frameNum;
 			Frame(::OpenGL::SourceManager* _sm, FrameScale const& _size)
 				:
 				renderer(_sm, _size),
 				pm(&_sm->folder),
 				context({ &rayAllocator }, 2),
-				trans({ context, {60.0},{0.002,0.9,0.001},{0.01},{0,0,0},700.0 }),
+				trans({ context, {60.0},{0.02,0.9,0.01},{0.3},{0,0,0},700.0 }),
 				rayAllocator(context, pm, "rayAllocator"),
 				miss(context, pm, "miss"),
+				triangleAttrib(context, pm, "attrib"),
 				resultBuffer(context, RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, renderer),
-				vertexBuffer(context, RT_BUFFER_INPUT, RT_FORMAT_FLOAT3),
 				material(context, pm),
-				triangles(context, 2, 1, RT_GEOMETRY_BUILD_FLAG_NONE),
+				triangles(context, 1, RT_GEOMETRY_BUILD_FLAG_NONE,
+					{
+						{"vertexBuffer",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3}
+					}),
 				result(context, "result"),
 				frame(context, "frame"),
 				backgroundColor(context, "background"),
 				offset(context, "offset"),
 				groupGPU(context, "group"),
-				triangleVertices(triangles, "vertices"),
 				instance(context),
 				geoGroup(context),
 				group(context),
 				geoGroupAccel(context, Acceleration::Trbvh),
 				groupAccel(context, Acceleration::Trbvh),
+				ahh(pm.folder->find("resources/Stanford_bunny_3.stl").readSTL()),
 				frameNum(0)
 			{
 				renderer.prepare();
@@ -87,18 +91,10 @@ namespace OpenGL
 				context.init();
 				trans.init(_size);
 				rtContextSetMissProgram(context, CloseRay, miss);
+				rtGeometryTrianglesSetAttributeProgram(triangles, triangleAttrib);
 				resultBuffer.setSize(_size.w, _size.h);
-				vertexBuffer.setSize(6);
-				Math::vec3<float>* v = (Math::vec3<float>*)vertexBuffer.map();
-				v[0] = { 0,0,-1 };
-				v[1] = { 0.1,1,-1 };
-				v[2] = { 0,1,-1 };
-				v[3] = { 0,0,-0.5 };
-				v[4] = { -1,0,-0.5 };
-				v[5] = { 0,-1,-0.5 };
-				vertexBuffer.unmap();
 
-				triangles.setVertices(&vertexBuffer, 6, 0, 12);
+				triangles.addSTL("vertexBuffer", ahh, ahh.triangles.length);
 				instance.setTriangles(triangles);
 				instance.setMaterial({ &material });
 				geoGroup.setInstance({ &instance });
@@ -107,9 +103,8 @@ namespace OpenGL
 				group.setGeoGroup({ &geoGroup });
 				result.setObject(resultBuffer);
 				groupGPU.setObject(group);
-				triangleVertices.setObject(vertexBuffer);
 				backgroundColor.set3f(0.0f, 0.0f, 0.0f);
-				material.color.set3f(0.0f, 1.0f, 0.0f);
+				material.color.set3f(1.0f, 1.0f, 1.0f);
 				offset.set1f(1e-5f);
 				context.validate();
 			}
@@ -141,7 +136,6 @@ namespace OpenGL
 			{
 				triangles.destory();
 				resultBuffer.destory();
-				vertexBuffer.destory();
 				instance.destory();
 				geoGroup.destory();
 				group.destory();
@@ -225,12 +219,12 @@ int main()
 	{
 		"Frame",
 		{
-			{400,400},
+			{1920,1080},
 			true,false
 		}
 	};
 	Window::WindowManager wm(winParameters);
-	OpenGL::Frame test({ 400,400 });
+	OpenGL::Frame test({ 1920,1080 });
 	wm.init(0, &test);
 	//init.printRenderer();
 	glfwSwapInterval(0);
