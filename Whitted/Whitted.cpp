@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#define __OptiX__
 #include <GL/_OpenGL.h>
 #include <GL/_Window.h>
 #include <GL/_Texture.h>
@@ -17,14 +18,14 @@ namespace OpenGL
 	{
 		struct Whitted :RayTracer
 		{
-			struct SimpleMaterial :Material
+			struct WhittedMaterial :Material
 			{
 				Variable<RTmaterial>color;
 				Program closeHitProgram;
 				Program anyHitProgram;
 				CloseHit closeHit;
 				AnyHit anyHit;
-				SimpleMaterial(RTcontext* _context, PTXManager& _pm)
+				WhittedMaterial(RTcontext* _context, PTXManager& _pm)
 					:
 					Material(_context),
 					color(&material, "materialColor"),
@@ -44,12 +45,11 @@ namespace OpenGL
 			Program rayAllocator;
 			Program miss;
 			Program triangleAttrib;
+			Program exception;
 			Buffer resultBuffer;
 			Buffer texBuffer;
-			SimpleMaterial material;
+			WhittedMaterial material;
 			GeometryTriangles triangles;
-			//BMPCubeData cubeData;
-			//TextureCube cube;
 			RTtexturesampler sampler;
 			Variable<RTcontext> result;
 			Variable<RTcontext> texTest;
@@ -57,6 +57,7 @@ namespace OpenGL
 			Variable<RTcontext> texid;
 			Variable<RTcontext> backgroundColor;
 			Variable<RTcontext> offset;
+			Variable<RTcontext> depthMax;
 			Variable<RTcontext> groupGPU;
 			GeometryInstance instance;
 			GeometryGroup geoGroup;
@@ -71,56 +72,51 @@ namespace OpenGL
 				:
 				renderer(_sm, _size),
 				pm(&_sm->folder),
-				context({ &rayAllocator }, 2),
-				trans({ context, {60.0},{0.02,0.99,0.01},{0.3},{0,0,0},700.0 }),
+				context({ &rayAllocator }, 2, 4),
+				trans({ context, {70.0},{0.001,0.9,0.0005},{0.03},{0,0,0},700.0 }),
 				rayAllocator(context, pm, "rayAllocator"),
 				miss(context, pm, "miss"),
 				triangleAttrib(context, pm, "attrib"),
+				exception(context, pm, "exception"),
 				resultBuffer(context, RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, renderer),
 				texBuffer(context, RT_BUFFER_INPUT | RT_BUFFER_CUBEMAP, RT_FORMAT_UNSIGNED_BYTE4),
 				material(context, pm),
 				triangles(context, 1, RT_GEOMETRY_BUILD_FLAG_NONE,
 					{
-						{"vertexBuffer",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3}
+						{"vertexBuffer",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3},
+						{"normalBuffer",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3},
+						{"indexBuffer",RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_INT3}
 					}),
-				//cubeData("resources/room/"),
-				//cube(&cubeData, 2, RGBA32f, 1, cubeData.bmp[0].header.width, cubeData.bmp[0].header.height),
 				result(context, "result"),
 				texTest(context, "ahh"),
 				frame(context, "frame"),
 				texid(context, "texid"),
 				backgroundColor(context, "background"),
 				offset(context, "offset"),
+				depthMax(context, "depthMax"),
 				groupGPU(context, "group"),
 				instance(context),
 				geoGroup(context),
 				group(context),
-				geoGroupAccel(context, Acceleration::Trbvh),
-				groupAccel(context, Acceleration::Trbvh),
+				geoGroupAccel(context, Acceleration::Sbvh),
+				groupAccel(context, Acceleration::Sbvh),
 				ahh(pm.folder->find("resources/Stanford_bunny_3.stl").readSTL()),
 				testBMP("resources/lightSource.bmp"),
 				testCube("resources/room/"),
 				frameNum(0)
 			{
 				renderer.prepare();
-				//context.printAllDeviceInfo();
 				context.init();
+				context.pringStackSize();
 				trans.init(_size);
 				rtContextSetMissProgram(context, CloseRay, miss);
 				rtGeometryTrianglesSetAttributeProgram(triangles, triangleAttrib);
 				resultBuffer.setSize(_size.w, _size.h);
-
-				//cube.dataInit(0, TextureInputBGRInt, TextureInputUByte);
-				//rtTextureSamplerCreateFromGLImage(context, cube.texture, RT_TARGET_GL_TEXTURE_CUBE_MAP, &cubeSampler);
-				//rtTextureSamplerSetFilteringModes(cubeSampler, RT_FILTER_LINEAR, RT_FILTER_LINEAR, RT_FILTER_NONE);
+				rtContextSetExceptionProgram(context, 0, exception);
 				//RTtexturesampler sampler;
-				testBMP.printInfo();
-				testCube.bmp[0].printInfo();
-				testCube.bmp[1].printInfo();
-				testCube.bmp[2].printInfo();
-				testCube.bmp[3].printInfo();
-				testCube.bmp[4].printInfo();
-				testCube.bmp[5].printInfo();
+				//rtContextSetStackSize(context, 4000);
+				//rtContextSetPrintEnabled(context, 1);
+				//rtContextSetPrintBufferSize(context, 4096);
 				texBuffer.readCube(testCube);
 				texBuffer.readBMP(testBMP);
 				rtTextureSamplerCreate(context, &sampler);
@@ -134,9 +130,8 @@ namespace OpenGL
 				int tex_id;
 				rtTextureSamplerGetId(sampler, &tex_id);
 				texid.set1u(tex_id);
-				//texTest.setObject((RTobject*)& sampler);
 
-				triangles.addSTL("vertexBuffer", ahh, ahh.triangles.length);
+				triangles.addSTL("vertexBuffer", "normalBuffer", "indexBuffer", ahh);
 				instance.setTriangles(triangles);
 				instance.setMaterial({ &material });
 				geoGroup.setInstance({ &instance });
@@ -147,7 +142,8 @@ namespace OpenGL
 				groupGPU.setObject(group);
 				backgroundColor.set3f(0.0f, 0.0f, 0.0f);
 				material.color.set3f(1.0f, 1.0f, 1.0f);
-				offset.set1f(1e-4f);
+				offset.set1f(1e-5f);
+				depthMax.set1u(context.maxDepth - 1);
 				context.validate();
 			}
 			virtual void run()override
@@ -259,14 +255,14 @@ int main()
 	OpenGL::OpenGLInit init(4, 5);
 	Window::Window::Data winParameters
 	{
-		"Frame",
+		"Whitted",
 		{
-			{1920,1080},
+			{1080,1080},
 			true,false
 		}
 	};
 	Window::WindowManager wm(winParameters);
-	OpenGL::Whitted whitted({ 1920,1080 });
+	OpenGL::Whitted whitted({ 1080,1080 });
 	wm.init(0, &whitted);
 	//init.printRenderer();
 	glfwSwapInterval(0);
