@@ -4,15 +4,15 @@
 #include <OptiX/_Define.h>
 #include "Define.h"
 using namespace optix;
-
+using namespace Define;
 rtDeclareVariable(uint2, index, rtLaunchIndex, );
 rtBuffer<float4, 2>result;
 rtBuffer<float3>vertexBuffer;
+rtBuffer<float3>vertexBufferIndexed;
 rtBuffer<float3>normalBuffer;
 rtBuffer<uint3>indexBuffer;
 rtDeclareVariable(unsigned int, frame, , );
 rtDeclareVariable(unsigned int, texid, , );
-//rtDeclareVariable(float3, background, , );
 rtDeclareVariable(float3, materialColor, , );
 rtDeclareVariable(Define::Trans, trans, , );
 rtDeclareVariable(float, offset, , );
@@ -115,15 +115,21 @@ RT_PROGRAM void exception()
 }
 RT_PROGRAM void attrib()
 {
-	uint3 id = indexBuffer[rtGetPrimitiveIndex()];
-	//float3 p0 = vertexBuffer[3 * id];
-	//float3 p1 = vertexBuffer[3 * id + 1];
-	//float3 p2 = vertexBuffer[3 * id + 2];
-	//float3 d1 = p1 - p0;
-	//float3 d2 = p2 - p0;
+	unsigned int id = rtGetPrimitiveIndex();
+	float3 p0 = vertexBuffer[3 * id];
+	float3 p1 = vertexBuffer[3 * id + 1];
+	float3 p2 = vertexBuffer[3 * id + 2];
+	float3 d1 = p1 - p0;
+	float3 d2 = p2 - p0;
 	texcoord = rtGetTriangleBarycentrics();
-	normal = normalize(
+	normal = normalize(rtTransformNormal(RT_OBJECT_TO_WORLD, normalize(cross(d1, d2))));
+}
+RT_PROGRAM void attribIndexed()
+{
+	uint3 id = indexBuffer[rtGetPrimitiveIndex()];
+	texcoord = rtGetTriangleBarycentrics();
+	normal = normalize(rtTransformNormal(RT_OBJECT_TO_WORLD, normalize(
 		texcoord.x * normalBuffer[id.y] +
 		texcoord.y * normalBuffer[id.z] +
-		(1 - texcoord.x - texcoord.y) * normalBuffer[id.x]);
+		(1 - texcoord.x - texcoord.y) * normalBuffer[id.x])));
 }

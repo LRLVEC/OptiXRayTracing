@@ -1,9 +1,13 @@
 #pragma once
 #include <OptiX/_Define.h>
-#define CloseRay 0
-#define AnyRay 1
+
 namespace Define
 {
+	enum RayType
+	{
+		CloseRay = 0,
+		AnyRay = 1,
+	};
 	struct RayData
 	{
 		float3 color;

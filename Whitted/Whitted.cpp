@@ -16,16 +16,17 @@ namespace OpenGL
 {
 	namespace OptiX
 	{
-		struct Whitted :RayTracer
+		using namespace Define;
+		struct MonteCarlo :RayTracer
 		{
-			struct WhittedMaterial :Material
+			struct Glass :Material
 			{
 				Variable<RTmaterial>color;
 				Program closeHitProgram;
 				Program anyHitProgram;
 				CloseHit closeHit;
 				AnyHit anyHit;
-				WhittedMaterial(RTcontext* _context, PTXManager& _pm)
+				Glass(RTcontext* _context, PTXManager& _pm)
 					:
 					Material(_context),
 					color(&material, "materialColor"),
@@ -41,49 +42,47 @@ namespace OpenGL
 			DefautRenderer renderer;
 			PTXManager pm;
 			Context context;
-			Transform trans;
-			Program rayAllocator;
-			Program miss;
-			Program triangleAttrib;
+			Trans trans;
 			Program exception;
 			Buffer resultBuffer;
 			Buffer texBuffer;
-			WhittedMaterial material;
+			Glass material;
 			GeometryTriangles triangles;
+			GeometryTriangles trianglesIndexed;
 			RTtexturesampler sampler;
 			Variable<RTcontext> result;
 			Variable<RTcontext> texTest;
 			Variable<RTcontext> frame;
 			Variable<RTcontext> texid;
-			Variable<RTcontext> backgroundColor;
 			Variable<RTcontext> offset;
 			Variable<RTcontext> depthMax;
-			Variable<RTcontext> groupGPU;
 			GeometryInstance instance;
+			GeometryInstance instanceIndexed;
 			GeometryGroup geoGroup;
-			Acceleration geoGroupAccel;
-			Acceleration groupAccel;
+			GeometryGroup geoGroup1;
+			Transform ghh;
 			Group group;
 			STL ahh;
 			BMP testBMP;
 			BMPCube testCube;
 			unsigned int frameNum;
-			Whitted(::OpenGL::SourceManager* _sm, FrameScale const& _size)
+			MonteCarlo(::OpenGL::SourceManager* _sm, FrameScale const& _size)
 				:
 				renderer(_sm, _size),
 				pm(&_sm->folder),
-				context({ &rayAllocator }, 2, 4),
+				context(pm, { {0,"rayAllocator"} }, { {CloseRay,"miss"} }, 2, 7),
 				trans({ context, {70.0},{0.001,0.9,0.0005},{0.03},{0,0,0},700.0 }),
-				rayAllocator(context, pm, "rayAllocator"),
-				miss(context, pm, "miss"),
-				triangleAttrib(context, pm, "attrib"),
 				exception(context, pm, "exception"),
 				resultBuffer(context, RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, renderer),
 				texBuffer(context, RT_BUFFER_INPUT | RT_BUFFER_CUBEMAP, RT_FORMAT_UNSIGNED_BYTE4),
 				material(context, pm),
-				triangles(context, 1, RT_GEOMETRY_BUILD_FLAG_NONE,
+				triangles(context, pm, "attrib", 1, RT_GEOMETRY_BUILD_FLAG_NONE,
 					{
-						{"vertexBuffer",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3},
+						{"vertexBuffer",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3}
+					}),
+				trianglesIndexed(context, pm, "attribIndexed", 1, RT_GEOMETRY_BUILD_FLAG_NONE,
+					{
+						{"vertexBufferIndexed",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3},
 						{"normalBuffer",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3},
 						{"indexBuffer",RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_INT3}
 					}),
@@ -91,30 +90,24 @@ namespace OpenGL
 				texTest(context, "ahh"),
 				frame(context, "frame"),
 				texid(context, "texid"),
-				backgroundColor(context, "background"),
 				offset(context, "offset"),
 				depthMax(context, "depthMax"),
-				groupGPU(context, "group"),
 				instance(context),
-				geoGroup(context),
-				group(context),
-				geoGroupAccel(context, Acceleration::Sbvh),
-				groupAccel(context, Acceleration::Sbvh),
-				ahh(pm.folder->find("resources/Stanford_bunny_3.stl").readSTL()),
+				instanceIndexed(context),
+				geoGroup(context, Acceleration::Trbvh),
+				geoGroup1(context, Acceleration::Trbvh),
+				ghh(context),
+				group(context, "group", Acceleration::Trbvh),
+				ahh(pm.folder->find("resources/Bug.stl").readSTL()),
 				testBMP("resources/lightSource.bmp"),
 				testCube("resources/room/"),
 				frameNum(0)
 			{
 				renderer.prepare();
-				context.init();
-				context.pringStackSize();
 				trans.init(_size);
-				rtContextSetMissProgram(context, CloseRay, miss);
-				rtGeometryTrianglesSetAttributeProgram(triangles, triangleAttrib);
 				resultBuffer.setSize(_size.w, _size.h);
 				rtContextSetExceptionProgram(context, 0, exception);
 				//RTtexturesampler sampler;
-				//rtContextSetStackSize(context, 4000);
 				//rtContextSetPrintEnabled(context, 1);
 				//rtContextSetPrintBufferSize(context, 4096);
 				texBuffer.readCube(testCube);
@@ -131,16 +124,25 @@ namespace OpenGL
 				rtTextureSamplerGetId(sampler, &tex_id);
 				texid.set1u(tex_id);
 
-				triangles.addSTL("vertexBuffer", "normalBuffer", "indexBuffer", ahh);
+				triangles.addSTL("vertexBuffer", ahh, ahh.triangles.length);
+				trianglesIndexed.addSTL("vertexBufferIndexed", "normalBuffer", "indexBuffer", ahh);
 				instance.setTriangles(triangles);
 				instance.setMaterial({ &material });
-				geoGroup.setInstance({ &instance });
-				geoGroup.setAccel(geoGroupAccel);
-				group.setAccel(groupAccel);
-				group.setGeoGroup({ &geoGroup });
+				instanceIndexed.setTriangles(trianglesIndexed);
+				instanceIndexed.setMaterial({ &material });
+
+				geoGroup.setInstance({ &instanceIndexed });
+				geoGroup1.setInstance({ &instance });
+				ghh.setMat({
+					{1, 0, 0, 5},
+					{0, 1, 0, 0},
+					{0, 0, 0.5, 0},
+					{0, 0, 0, 1}
+					});
+				ghh.setChild(geoGroup1);
+
+				group.setGeoGroup({ geoGroup, ghh });
 				result.setObject(resultBuffer);
-				groupGPU.setObject(group);
-				backgroundColor.set3f(0.0f, 0.0f, 0.0f);
 				material.color.set3f(1.0f, 1.0f, 1.0f);
 				offset.set1f(1e-5f);
 				depthMax.set1u(context.maxDepth - 1);
@@ -172,43 +174,41 @@ namespace OpenGL
 			}
 			virtual void terminate()override
 			{
-				triangles.destory();
+				trianglesIndexed.destory();
 				resultBuffer.destory();
-				instance.destory();
+				instanceIndexed.destory();
 				geoGroup.destory();
+				geoGroup1.destory();
 				group.destory();
-				geoGroupAccel.destory();
-				groupAccel.destory();
-				rayAllocator.destory();
 				context.destory();
 			}
 		};
 	}
-	struct Whitted :OpenGL
+	struct RayTracing :OpenGL
 	{
 		SourceManager sm;
-		OptiX::Whitted whitted;
-		Whitted(FrameScale const& _size)
+		OptiX::MonteCarlo monteCarlo;
+		RayTracing(FrameScale const& _size)
 			:
 			sm(),
-			whitted(&sm, _size)
+			monteCarlo(&sm, _size)
 		{
 		}
 		virtual void init(FrameScale const& _size) override
 		{
-			whitted.resize(_size);
+			monteCarlo.resize(_size);
 		}
 		virtual void run() override
 		{
-			whitted.run();
+			monteCarlo.run();
 		}
 		void terminate()
 		{
-			whitted.terminate();
+			monteCarlo.terminate();
 		}
 		virtual void frameSize(int _w, int _h)override
 		{
-			whitted.resize({ _w,_h });
+			monteCarlo.resize({ _w,_h });
 		}
 		virtual void framePos(int, int) override {}
 		virtual void frameFocus(int) override {}
@@ -216,19 +216,19 @@ namespace OpenGL
 		{
 			switch (_button)
 			{
-				case GLFW_MOUSE_BUTTON_LEFT:whitted.trans.mouse.refreshButton(0, _action); break;
-				case GLFW_MOUSE_BUTTON_MIDDLE:whitted.trans.mouse.refreshButton(1, _action); break;
-				case GLFW_MOUSE_BUTTON_RIGHT:whitted.trans.mouse.refreshButton(2, _action); break;
+				case GLFW_MOUSE_BUTTON_LEFT:monteCarlo.trans.mouse.refreshButton(0, _action); break;
+				case GLFW_MOUSE_BUTTON_MIDDLE:monteCarlo.trans.mouse.refreshButton(1, _action); break;
+				case GLFW_MOUSE_BUTTON_RIGHT:monteCarlo.trans.mouse.refreshButton(2, _action); break;
 			}
 		}
 		virtual void mousePos(double _x, double _y)override
 		{
-			whitted.trans.mouse.refreshPos(_x, _y);
+			monteCarlo.trans.mouse.refreshPos(_x, _y);
 		}
 		virtual void mouseScroll(double _x, double _y)override
 		{
 			if (_y != 0.0)
-				whitted.trans.scroll.refresh(_y);
+				monteCarlo.trans.scroll.refresh(_y);
 		}
 		virtual void key(GLFWwindow* _window, int _key, int _scancode, int _action, int _mods) override
 		{
@@ -239,10 +239,10 @@ namespace OpenGL
 						if (_action == GLFW_PRESS)
 							glfwSetWindowShouldClose(_window, true);
 						break;
-					case GLFW_KEY_A:whitted.trans.key.refresh(0, _action); break;
-					case GLFW_KEY_D:whitted.trans.key.refresh(1, _action); break;
-					case GLFW_KEY_W:whitted.trans.key.refresh(2, _action); break;
-					case GLFW_KEY_S:whitted.trans.key.refresh(3, _action); break;
+					case GLFW_KEY_A:monteCarlo.trans.key.refresh(0, _action); break;
+					case GLFW_KEY_D:monteCarlo.trans.key.refresh(1, _action); break;
+					case GLFW_KEY_W:monteCarlo.trans.key.refresh(2, _action); break;
+					case GLFW_KEY_S:monteCarlo.trans.key.refresh(3, _action); break;
 				}
 			}
 		}
@@ -262,8 +262,8 @@ int main()
 		}
 	};
 	Window::WindowManager wm(winParameters);
-	OpenGL::Whitted whitted({ 1080,1080 });
-	wm.init(0, &whitted);
+	OpenGL::RayTracing monteCarlo({ 1080,1080 });
+	wm.init(0, &monteCarlo);
 	//init.printRenderer();
 	glfwSwapInterval(0);
 	FPS fps;
@@ -276,7 +276,7 @@ int main()
 		//fps.refresh();
 		//fps.printFPS(1);
 	}
-	whitted.terminate();
+	monteCarlo.terminate();
 	return 0;
 }
 
