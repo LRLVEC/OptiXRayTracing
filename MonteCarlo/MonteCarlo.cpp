@@ -30,8 +30,28 @@ namespace OpenGL
 					:
 					Material(_context),
 					color(&material, "materialColor"),
-					closeHitProgram(_context, _pm, "closeHit"),
-					anyHitProgram(_context, _pm, "anyHit"),
+					closeHitProgram(_context, _pm, "glassCloseHit"),
+					anyHitProgram(_context, _pm, "glassAnyHit"),
+					closeHit(&material, closeHitProgram, CloseRay),
+					anyHit(&material, anyHitProgram, AnyRay)
+				{
+					closeHit.setProgram();
+					anyHit.setProgram();
+				}
+			};
+			struct Diffuse :Material
+			{
+				Variable<RTmaterial>color;
+				Program closeHitProgram;
+				Program anyHitProgram;
+				CloseHit closeHit;
+				AnyHit anyHit;
+				Diffuse(RTcontext* _context, PTXManager& _pm)
+					:
+					Material(_context),
+					color(&material, "materialColor"),
+					closeHitProgram(_context, _pm, "diffuseCloseHIt"),
+					anyHitProgram(_context, _pm, "diffuseAnyHit"),
 					closeHit(&material, closeHitProgram, CloseRay),
 					anyHit(&material, anyHitProgram, AnyRay)
 				{
@@ -47,6 +67,7 @@ namespace OpenGL
 			Buffer resultBuffer;
 			Buffer texBuffer;
 			Glass material;
+			Diffuse diffuse;
 			GeometryTriangles triangles;
 			GeometryTriangles trianglesIndexed;
 			RTtexturesampler sampler;
@@ -56,6 +77,7 @@ namespace OpenGL
 			Variable<RTcontext> texid;
 			Variable<RTcontext> offset;
 			Variable<RTcontext> depthMax;
+			Variable<RTcontext> russian;
 			GeometryInstance instance;
 			GeometryInstance instanceIndexed;
 			GeometryGroup geoGroup;
@@ -70,12 +92,13 @@ namespace OpenGL
 				:
 				renderer(_sm, _size),
 				pm(&_sm->folder),
-				context(pm, { {0,"rayAllocator"} }, { {CloseRay,"miss"} }, 2, 7),
+				context(pm, { {0,"rayAllocator"} }, { {CloseRay,"miss"} }, 2, 30),
 				trans({ context, {70.0},{0.001,0.9,0.0005},{0.03},{0,0,0},700.0 }),
 				exception(context, pm, "exception"),
 				resultBuffer(context, RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, renderer),
 				texBuffer(context, RT_BUFFER_INPUT | RT_BUFFER_CUBEMAP, RT_FORMAT_UNSIGNED_BYTE4),
 				material(context, pm),
+				diffuse(context, pm),
 				triangles(context, pm, "attrib", 1, RT_GEOMETRY_BUILD_FLAG_NONE,
 					{
 						{"vertexBuffer",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3}
@@ -92,18 +115,20 @@ namespace OpenGL
 				texid(context, "texid"),
 				offset(context, "offset"),
 				depthMax(context, "depthMax"),
+				russian(context, "russian"),
 				instance(context),
 				instanceIndexed(context),
 				geoGroup(context, Acceleration::Trbvh),
 				geoGroup1(context, Acceleration::Trbvh),
 				ghh(context),
 				group(context, "group", Acceleration::Trbvh),
-				ahh(pm.folder->find("resources/Bug.stl").readSTL()),
+				ahh(pm.folder->find("resources/Box1.stl").readSTL()),
 				testBMP("resources/lightSource.bmp"),
 				testCube("resources/room/"),
 				frameNum(0)
 			{
 				renderer.prepare();
+				context.pringStackSize();
 				trans.init(_size);
 				resultBuffer.setSize(_size.w, _size.h);
 				rtContextSetExceptionProgram(context, 0, exception);
@@ -127,25 +152,27 @@ namespace OpenGL
 				triangles.addSTL("vertexBuffer", ahh, ahh.triangles.length);
 				trianglesIndexed.addSTL("vertexBufferIndexed", "normalBuffer", "indexBuffer", ahh);
 				instance.setTriangles(triangles);
-				instance.setMaterial({ &material });
+				instance.setMaterial({ &diffuse });
 				instanceIndexed.setTriangles(trianglesIndexed);
-				instanceIndexed.setMaterial({ &material });
+				instanceIndexed.setMaterial({ &diffuse });
 
-				geoGroup.setInstance({ &instanceIndexed });
-				geoGroup1.setInstance({ &instance });
+				geoGroup.setInstance({ &instance });
+				geoGroup1.setInstance({ &instanceIndexed });
 				ghh.setMat({
 					{1, 0, 0, 5},
 					{0, 1, 0, 0},
-					{0, 0, 0.5, 0},
+					{0, 0, 1, 0},
 					{0, 0, 0, 1}
 					});
 				ghh.setChild(geoGroup1);
 
-				group.setGeoGroup({ geoGroup, ghh });
+				group.setGeoGroup({ geoGroup });
 				result.setObject(resultBuffer);
 				material.color.set3f(1.0f, 1.0f, 1.0f);
 				offset.set1f(1e-5f);
+				diffuse.color.set3f(0.7f, 0.7f, 0.7f);
 				depthMax.set1u(context.maxDepth - 1);
+				russian.set1u(10);
 				context.validate();
 			}
 			virtual void run()override

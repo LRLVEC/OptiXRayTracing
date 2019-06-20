@@ -17,6 +17,7 @@ rtDeclareVariable(float3, materialColor, , );
 rtDeclareVariable(Define::Trans, trans, , );
 rtDeclareVariable(float, offset, , );
 rtDeclareVariable(unsigned int, depthMax, , );
+rtDeclareVariable(unsigned int, russian, , );
 rtDeclareVariable(rtObject, group, , );
 rtDeclareVariable(Ray, ray, rtCurrentRay, );
 rtDeclareVariable(Define::RayData, rayData, rtPayload, );
@@ -42,11 +43,11 @@ RT_PROGRAM void rayAllocator()
 	else
 		result[index] = make_float4(rayDataOrigin.color, 1.0f);
 }
-RT_PROGRAM void anyHit()
+RT_PROGRAM void glassAnyHit()
 {
 	rtTerminateRay();
 }
-RT_PROGRAM void closeHit()
+RT_PROGRAM void glassCloseHit()
 {
 	float3 answer = make_float3(0);
 	if (rayData.depth < depthMax)
@@ -61,7 +62,7 @@ RT_PROGRAM void closeHit()
 		Ray rayNow;
 		rayNow.origin = ray.origin + l * ray.direction;
 		Define::RayData rayDataNow;
-		rayDataNow.color = make_float3(0);
+		bool seted(false);
 		rayDataNow.depth = rayData.depth + 1;
 		if (sini2 < 1)
 		{
@@ -85,23 +86,49 @@ RT_PROGRAM void closeHit()
 				rayNow.direction = (ray.direction + (n * copysignf(cosi2, cosi1) - cosi1) * normal) / n;
 				rayNow.tmin = offset;
 				rayNow.tmax = RT_DEFAULT_MAX;
+				seted = true;
 				rtTrace(group, rayNow, rayDataNow);
-				rayNow.origin = ray.origin + l * ray.direction;
 				answer += rayDataNow.color * t;
 			}
 		}
 		else
 			r = make_float3(1);
-		rayDataNow.weight = rayData.weight * t;
+		rayDataNow.weight = rayData.weight * r;
 		if (rayDataNow.weight.x + rayDataNow.weight.y + rayDataNow.weight.z > 0.01)
 		{
 			rayNow.direction = ray.direction - 2 * cosi1 * normal;
-			rayNow.tmin = offset;
-			rayNow.tmax = RT_DEFAULT_MAX;
-			rayDataNow.color = make_float3(0);
 			rtTrace(group, rayNow, rayDataNow);
 			answer += rayDataNow.color * r;
 		}
+	}
+	rayData.color = answer;
+}
+RT_PROGRAM void diffuseAnyHit()
+{
+	rtTerminateRay();
+}
+RT_PROGRAM void diffuseCloseHIt()
+{
+	float3 answer = make_float3(0);
+	if (rayData.depth < depthMax)
+	{
+		float k(1);
+		float2 seed(make_float2(ray.origin.y - sqrtf(frame), ray.direction.z + sqrtf(frame)));
+		if (rayData.depth > russian)
+		{
+			if (random(seed) < 0.2f) { rayData.color = answer; return; }
+			else k /= 0.8f;
+		}
+		float cosi1 = dot(ray.direction, normal);
+		Ray rayNow;
+		rayNow.origin = ray.origin + l * ray.direction;
+		rayNow.tmin = offset;
+		rayNow.tmax = RT_DEFAULT_MAX;
+		Define::RayData rayDataNow;
+		rayDataNow.depth = rayData.depth + 1;
+		rayNow.direction = randomDirectionCosN(cosi1 <= 0 ? normal : -normal, 1, seed);
+		rtTrace(group, rayNow, rayDataNow);
+		answer += rayDataNow.color * materialColor * k;
 	}
 	rayData.color = answer;
 }

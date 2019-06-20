@@ -1,7 +1,12 @@
 Program:	DrawColor
 {
-	drawColor
-	closeHit
-	anyHit
+	rayAllocator
+	glassAnyHit
+	glassCloseHit
+	diffuseAnyHit
+	diffuseCloseHIt
 	miss
+	exception
+	attrib
+	attribIndexed
 }

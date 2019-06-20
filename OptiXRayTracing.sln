@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Whitted", "Whitted\Whitted.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MonteCarlo", "MonteCarlo\MonteCarlo.vcxproj", "{AE36717D-79D5-4D2E-8912-325401711028}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Scatter", "Scatter\Scatter.vcxproj", "{7F35ECFB-3E92-42FE-8632-5BE9EEEAE432}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -59,6 +61,12 @@ Global
 		{AE36717D-79D5-4D2E-8912-325401711028}.Release|x64.ActiveCfg = Release|x64
 		{AE36717D-79D5-4D2E-8912-325401711028}.Release|x64.Build.0 = Release|x64
 		{AE36717D-79D5-4D2E-8912-325401711028}.Release|x86.ActiveCfg = Release|x64
+		{7F35ECFB-3E92-42FE-8632-5BE9EEEAE432}.Debug|x64.ActiveCfg = Debug|x64
+		{7F35ECFB-3E92-42FE-8632-5BE9EEEAE432}.Debug|x64.Build.0 = Debug|x64
+		{7F35ECFB-3E92-42FE-8632-5BE9EEEAE432}.Debug|x86.ActiveCfg = Debug|x64
+		{7F35ECFB-3E92-42FE-8632-5BE9EEEAE432}.Release|x64.ActiveCfg = Release|x64
+		{7F35ECFB-3E92-42FE-8632-5BE9EEEAE432}.Release|x64.Build.0 = Release|x64
+		{7F35ECFB-3E92-42FE-8632-5BE9EEEAE432}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
