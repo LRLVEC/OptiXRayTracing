@@ -238,7 +238,7 @@ namespace OpenGL
 				transScatter(context),
 				transLight(context),
 				group(context, "group", Acceleration::Trbvh),
-				ahh(pm.folder->find("resources/Stanford_bunny.stl").readSTL()),
+				ahh(pm.folder->find("resources/Stanford_bunny_3.stl").readSTL()),
 				testBMP("resources/lightSource.bmp"),
 				testCube("resources/room/"),
 				frameNum(0)
@@ -323,8 +323,8 @@ namespace OpenGL
 				scatter.scatter.set1f(0.4);
 				scatter.decay.set3f(1, 0, 1);
 				glassScatter.n.set1f(1.5);
-				glassScatter.decay.set3f(0.6, 0.06, 0.6);
-				glassScatter.scatter.set1f(10);
+				glassScatter.decay.set3f(1, 0.06, 1);
+				glassScatter.scatter.set1f(1);
 				light.color.set3f(1, 1, 1);
 				offset.set1f(1e-5f);
 				depthMax.set1u(context.maxDepth - 1);
@@ -342,6 +342,9 @@ namespace OpenGL
 				else ++frameNum;
 				frame.set1u(frameNum);
 				FrameScale size(renderer.size());
+				context.launch(0, size.w, size.h);
+				++frameNum;
+				frame.set1u(frameNum);
 				context.launch(0, size.w, size.h);
 				renderer.updated = true;
 				renderer.use();

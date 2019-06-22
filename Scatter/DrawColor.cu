@@ -261,7 +261,10 @@ RT_PROGRAM void glassScatterCloseHit()
 		}
 		else
 		{
-			float4 ahh(randomScatter(ray.direction, l, scatter, seed));
+			float sini1 = sqrtf(1 - cosi1 * cosi1);
+			float sini2 = sini1 / n;
+			float cosi2 = sqrtf(1 - sini2 * sini2);
+			float4 ahh(randomScatter((ray.direction + (n * copysignf(cosi2, cosi1) - cosi1) * normal) / n, l, scatter, seed));
 			rayNow.origin = ray.origin + ahh.w * ray.direction;
 			rayNow.direction = make_float3(ahh);
 			rtTrace(group, rayNow, rayDataNow);
@@ -280,11 +283,13 @@ RT_PROGRAM void lightCloseHit()
 }
 RT_PROGRAM void miss()
 {
-	//rayData.color = make_float3(rtTexCubemap<float4>(texid, ray.direction.x, ray.direction.y, ray.direction.z));
-	if (ray.direction.x > 0.9)
-		rayData.color = { 400,400,400 };//
-	else
-		rayData.color = { 0 };
+	rayData.color = make_float3(rtTexCubemap<float4>(texid, ray.direction.x, ray.direction.y, ray.direction.z));
+	float3 source{ -2,1.5,1 };
+	float3 dir(normalize(ray.origin - source));
+	if (dir.x > 0.999 && rayData.depth)
+		rayData.color += { 10, 10, 10 };//
+	//else
+		//rayData.color = { 0 };
 }
 RT_PROGRAM void exception()
 {
