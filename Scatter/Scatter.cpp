@@ -42,6 +42,8 @@ namespace OpenGL
 			struct Glass :Material
 			{
 				Variable<RTmaterial>color;
+				Variable<RTmaterial>decay;
+				Variable<RTmaterial>n;
 				Program closeHitProgram;
 				Program anyHitProgram;
 				CloseHit closeHit;
@@ -50,6 +52,8 @@ namespace OpenGL
 					:
 					Material(_context),
 					color(&material, "materialColor"),
+					decay(&material, "decay"),
+					n(&material, "n"),
 					closeHitProgram(_context, _pm, "glassCloseHit"),
 					anyHitProgram(_context, _pm, "glassAnyHit"),
 					closeHit(&material, closeHitProgram, CloseRay),
@@ -81,7 +85,8 @@ namespace OpenGL
 			};
 			struct Scatter :Material
 			{
-				Variable<RTmaterial>color;
+				Variable<RTmaterial>scatter;
+				Variable<RTmaterial>decay;
 				Program closeHitProgram;
 				Program anyHitProgram;
 				CloseHit closeHit;
@@ -89,9 +94,54 @@ namespace OpenGL
 				Scatter(RTcontext* _context, PTXManager& _pm)
 					:
 					Material(_context),
-					color(&material, "materialColor"),
+					scatter(&material, "scatter"),
+					decay(&material, "decay"),
 					closeHitProgram(_context, _pm, "scatterCloseHit"),
 					anyHitProgram(_context, _pm, "scatterAnyHit"),
+					closeHit(&material, closeHitProgram, CloseRay),
+					anyHit(&material, anyHitProgram, AnyRay)
+				{
+					closeHit.setProgram();
+					anyHit.setProgram();
+				}
+			};
+			struct GlassScatter :Material
+			{
+				Variable<RTmaterial>decay;
+				Variable<RTmaterial>n;
+				Variable<RTmaterial>scatter;
+				Program closeHitProgram;
+				Program anyHitProgram;
+				CloseHit closeHit;
+				AnyHit anyHit;
+				GlassScatter(RTcontext* _context, PTXManager& _pm)
+					:
+					Material(_context),
+					decay(&material, "decay"),
+					n(&material, "n"),
+					scatter(&material, "scatter"),
+					closeHitProgram(_context, _pm, "glassScatterCloseHit"),
+					anyHitProgram(_context, _pm, "glassScatterAnyHit"),
+					closeHit(&material, closeHitProgram, CloseRay),
+					anyHit(&material, anyHitProgram, AnyRay)
+				{
+					closeHit.setProgram();
+					anyHit.setProgram();
+				}
+			};
+			struct Light :Material
+			{
+				Variable<RTmaterial>color;
+				Program closeHitProgram;
+				Program anyHitProgram;
+				CloseHit closeHit;
+				AnyHit anyHit;
+				Light(RTcontext* _context, PTXManager& _pm)
+					:
+					Material(_context),
+					color(&material, "materialColor"),
+					closeHitProgram(_context, _pm, "lightCloseHit"),
+					anyHitProgram(_context, _pm, "lightAnyHit"),
 					closeHit(&material, closeHitProgram, CloseRay),
 					anyHit(&material, anyHitProgram, AnyRay)
 				{
@@ -110,6 +160,8 @@ namespace OpenGL
 			Glass glass;
 			Diffuse diffuse;
 			Scatter scatter;
+			GlassScatter glassScatter;
+			Light light;
 			GeometryTriangles triangles;
 			GeometryTriangles trianglesIndexed;
 			RTtexturesampler sampler;
@@ -124,13 +176,16 @@ namespace OpenGL
 			GeometryInstance instanceGlass;
 			GeometryInstance instanceDiffuse;
 			GeometryInstance instanceScatter;
+			GeometryInstance instanceLight;
 			GeometryGroup geoGroupMetal;
 			GeometryGroup geoGroupGlass;
 			GeometryGroup geoGroupDiffuse;
 			GeometryGroup geoGroupScatter;
+			GeometryGroup geoGroupLight;
 			Transform transGlass;
 			Transform transDiffuse;
 			Transform transScatter;
+			Transform transLight;
 			Group group;
 			STL ahh;
 			BMP testBMP;
@@ -141,7 +196,7 @@ namespace OpenGL
 				renderer(_sm, _size),
 				pm(&_sm->folder),
 				context(pm, { {0,"rayAllocator"} }, { {CloseRay,"miss"} }, 2, 30),
-				trans({ context, {70.0},{0.001,0.9,0.0005},{0.03},{0,0,0},700.0 }),
+				trans({ context, {70.0},{0.001,0.9,0.0005},{0.06},{0,0,0},700.0 }),
 				exception(context, pm, "exception"),
 				resultBuffer(context, RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4, renderer),
 				texBuffer(context, RT_BUFFER_INPUT | RT_BUFFER_CUBEMAP, RT_FORMAT_UNSIGNED_BYTE4),
@@ -149,6 +204,8 @@ namespace OpenGL
 				glass(context, pm),
 				diffuse(context, pm),
 				scatter(context, pm),
+				glassScatter(context, pm),
+				light(context, pm),
 				triangles(context, pm, "attrib", 1, RT_GEOMETRY_BUILD_FLAG_NONE,
 					{
 						{"vertexBuffer",RT_BUFFER_INPUT, RT_FORMAT_FLOAT3}
@@ -170,13 +227,16 @@ namespace OpenGL
 				instanceGlass(context),
 				instanceDiffuse(context),
 				instanceScatter(context),
+				instanceLight(context),
 				geoGroupMetal(context, Acceleration::Trbvh),
 				geoGroupGlass(context, Acceleration::Trbvh),
 				geoGroupDiffuse(context, Acceleration::Trbvh),
 				geoGroupScatter(context, Acceleration::Trbvh),
+				geoGroupLight(context, Acceleration::Trbvh),
 				transGlass(context),
 				transDiffuse(context),
 				transScatter(context),
+				transLight(context),
 				group(context, "group", Acceleration::Trbvh),
 				ahh(pm.folder->find("resources/Stanford_bunny.stl").readSTL()),
 				testBMP("resources/lightSource.bmp"),
@@ -184,6 +244,7 @@ namespace OpenGL
 				frameNum(0)
 			{
 				renderer.prepare();
+				//context.printDeviceInfo();
 				context.pringStackSize();
 				trans.init(_size);
 				resultBuffer.setSize(_size.w, _size.h);
@@ -210,44 +271,61 @@ namespace OpenGL
 				instanceMetal.setTriangles(trianglesIndexed);
 				instanceGlass.setTriangles(trianglesIndexed);
 				instanceDiffuse.setTriangles(trianglesIndexed);
-				instanceScatter.setTriangles(triangles);
-				instanceMetal.setMaterial({ &metal });
+				instanceScatter.setTriangles(trianglesIndexed);
+				instanceLight.setTriangles(trianglesIndexed);
+				instanceMetal.setMaterial({ &glassScatter });
 				instanceGlass.setMaterial({ &glass });
 				instanceDiffuse.setMaterial({ &diffuse });
-				instanceScatter.setMaterial({ &scatter });
+				instanceScatter.setMaterial({ &glassScatter });
+				instanceLight.setMaterial({ &light });
 				geoGroupMetal.setInstance({ &instanceMetal });
 				geoGroupGlass.setInstance({ &instanceGlass });
 				geoGroupDiffuse.setInstance({ &instanceDiffuse });
 				geoGroupScatter.setInstance({ &instanceScatter });
+				geoGroupLight.setInstance({ &instanceLight });
 
 				transGlass.setMat({
-					{1, 0, 0, 5},
+					{1, 0, 0, 10},
 					{0, 1, 0, 0},
 					{0, 0, 1, 0},
 					{0, 0, 0, 1}
 					});
 				transDiffuse.setMat({
 					{1, 0, 0, 0},
-					{0, 1, 0, 5},
+					{0, 1, 0, 10},
 					{0, 0, 1, 0},
 					{0, 0, 0, 1}
 					});
 				transScatter.setMat({
-					{1, 0, 0, 5},
-					{0, 1, 0, 5},
+					{1, 0, 0, 10},
+					{0, 1, 0, 10},
 					{0, 0, 1, 0},
+					{0, 0, 0, 1}
+					});
+				transLight.setMat({
+					{1, 0, 0, 2.10},
+					{0, 1, 0, 2.10},
+					{0, 0, 1, 10},
 					{0, 0, 0, 1}
 					});
 				transGlass.setChild(geoGroupGlass);
 				transDiffuse.setChild(geoGroupDiffuse);
 				transScatter.setChild(geoGroupScatter);
+				transLight.setChild(geoGroupLight);
 
-				group.setGeoGroup({ geoGroupMetal, transGlass,transDiffuse,transScatter });
+				group.setGeoGroup({ geoGroupMetal });
 				result.setObject(resultBuffer);
 				metal.color.set3f(1.0f, 1.0f, 1.0f);
 				glass.color.set3f(1.0f, 1.0f, 1.0f);
+				glass.decay.set3f(0.6, 0.05, 0.6);
+				glass.n.set1f(1.5);
 				diffuse.color.set3f(0.7, 0.7, 0.7);
-				scatter.color.set3f(1, 1, 1);
+				scatter.scatter.set1f(0.4);
+				scatter.decay.set3f(1, 0, 1);
+				glassScatter.n.set1f(1.5);
+				glassScatter.decay.set3f(0.6, 0.06, 0.6);
+				glassScatter.scatter.set1f(10);
+				light.color.set3f(1, 1, 1);
 				offset.set1f(1e-5f);
 				depthMax.set1u(context.maxDepth - 1);
 				russian.set1u(10);
@@ -362,12 +440,12 @@ int main()
 	{
 		"Scatter",
 		{
-			{1920,1080},
+			{1080,1080},
 			true,false
 		}
 	};
 	Window::WindowManager wm(winParameters);
-	OpenGL::RayTracing monteCarlo({ 1920,1080 });
+	OpenGL::RayTracing monteCarlo({ 1080,1080 });
 	wm.init(0, &monteCarlo);
 	//init.printRenderer();
 	glfwSwapInterval(0);
