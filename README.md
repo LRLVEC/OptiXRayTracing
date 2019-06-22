@@ -1,0 +1,3 @@
+# OptiXRayTracing
+This is a ray tracing implement based on OptiX.
+To compile this, you need the "include" folder in my repositories...
